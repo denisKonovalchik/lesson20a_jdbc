@@ -11,8 +11,8 @@ import java.util.List;
 public interface UserDAO {
     void addUser(User user) throws SQLException;
     List<User> findAll();
-    void deleteById(int id) throws SQLException;
-    void deleteByLogin(String login) throws SQLException;
+    void deleteById(int id);
+    void deleteByLogin(String login);
     User findById(int id);
     User findByLogin(String login);
     List<User> findByAddress(Address address);

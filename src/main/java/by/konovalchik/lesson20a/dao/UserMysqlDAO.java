@@ -13,12 +13,10 @@ import java.util.List;
 
 public class UserMysqlDAO implements UserDAO {
 
-    public UserMysqlDAO() throws SQLException {
-    }
-
-    public void addUser(User user) throws SQLException {
-        Connection connection = MysqlConnection.getConnection();
+    public void addUser(User user) {
+        Connection connection = null;
         try {
+            connection = MysqlConnection.getConnection();
             connection.setAutoCommit(false);
             String sql1 = "INSERT INTO users VALUES (NULL, ?, ?) ";
             PreparedStatement statement1 = connection.prepareStatement(sql1);
@@ -59,10 +57,19 @@ public class UserMysqlDAO implements UserDAO {
 
             connection.commit();
         } catch(SQLException throwable) {
-            connection.rollback();
-            throwable.printStackTrace();
+            try {
+                if(connection !=null) connection.rollback();
+                throwable.printStackTrace();
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
         } finally {
-            connection.setAutoCommit(true);
+            try {
+                if(connection != null)
+                connection.setAutoCommit(true);
+            }catch(SQLException e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -116,7 +123,6 @@ public class UserMysqlDAO implements UserDAO {
                         users.get(users.indexOf(user)).getTelephones().add(telephone);
                 }
             }
-
            return users;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -126,15 +132,16 @@ public class UserMysqlDAO implements UserDAO {
 
 
     @Override
-    public void deleteById(int id) throws SQLException {
+    public void deleteById(int id) {
         List<Address> addresses = new ArrayList<>();
         List<Telephone> telephones = new ArrayList<>();
         int idUser = 0;
         int idTel = 0;
         int idAddr = 0;
 
-       Connection connection = MysqlConnection.getConnection();
+       Connection connection = null;
        try {
+           connection = MysqlConnection.getConnection();
            connection.setAutoCommit(false);
            String sql1 = "SELECT u.id_user, a.id_address, a.street, a.home, t.id_telephone, t.number " +
                                              "FROM users u "+
@@ -216,24 +223,35 @@ public class UserMysqlDAO implements UserDAO {
                }
            }
            connection.commit();
-       } catch (SQLException e) {
-           connection.rollback();
-           e.printStackTrace();
+       } catch(SQLException throwable) {
+           try {
+               if(connection !=null) connection.rollback();
+               throwable.printStackTrace();
+           }catch (SQLException e){
+               e.printStackTrace();
+           }
        } finally {
-           connection.setAutoCommit(true);
+           try {
+               if(connection != null)
+                   connection.setAutoCommit(true);
+           }catch(SQLException e){
+               e.printStackTrace();
+           }
        }
     }
 
+
     @Override
-    public void deleteByLogin(String login) throws SQLException{
+    public void deleteByLogin(String login) {
+        Connection connection = null;
         List<Address> addresses = new ArrayList<>();
         List<Telephone> telephones = new ArrayList<>();
         int idUser = 0;
         int idTel = 0;
         int idAddr = 0;
 
-        Connection connection = MysqlConnection.getConnection();
         try {
+            connection = MysqlConnection.getConnection();
             connection.setAutoCommit(false);
             String sql = "SELECT u.id_user FROM users u WHERE u.login = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -322,11 +340,20 @@ public class UserMysqlDAO implements UserDAO {
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            connection.rollback();
-            e.printStackTrace();
+        } catch(SQLException throwable) {
+            try {
+                if(connection !=null) connection.rollback();
+                throwable.printStackTrace();
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
         } finally {
-            connection.setAutoCommit(true);
+            try {
+                if(connection != null)
+                    connection.setAutoCommit(true);
+            }catch(SQLException e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -335,12 +362,12 @@ public class UserMysqlDAO implements UserDAO {
         List <User> users = new ArrayList<>();
         try(Connection connection = MysqlConnection.getConnection()){
             String sql = "SELECT u.id_user, u.login, u.password,ua.id_user, a.id_address, a.street, a.home, t.id_telephone, t.number " +
-                                              "FROM users u " +
-                                              "LEFT JOIN users_addresses ua ON u.id_user = ua.id_user " +
-                                              "LEFT JOIN addresses a ON ua.id_addr = a.id_address " +
-                                              "LEFT JOIN users_telephones ut ON u.id_user = ut.id_user " +
-                                              "LEFT JOIN telephones t ON ut.id_tel = t.id_telephone " +
-                                              "WHERE u.id_user = ? ";
+                    "FROM users u " +
+                    "LEFT JOIN users_addresses ua ON u.id_user = ua.id_user " +
+                    "LEFT JOIN addresses a ON ua.id_addr = a.id_address " +
+                    "LEFT JOIN users_telephones ut ON u.id_user = ut.id_user " +
+                    "LEFT JOIN telephones t ON ut.id_tel = t.id_telephone " +
+                    "WHERE u.id_user = ? ";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1,id);
             ResultSet resultSet = statement.executeQuery();
@@ -621,7 +648,6 @@ public class UserMysqlDAO implements UserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return false;
     }
 }

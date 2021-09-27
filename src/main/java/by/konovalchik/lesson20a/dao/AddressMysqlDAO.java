@@ -7,7 +7,7 @@ import com.mysql.cj.x.protobuf.MysqlxPrepare;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Optional;
 
 
 public class AddressMysqlDAO implements AddressDAO{
@@ -54,31 +54,30 @@ public class AddressMysqlDAO implements AddressDAO{
     }
 
     @Override
-    public Address findAddressById(int id) {
-        Address address = new Address();
+    public Optional<Address> findAddressById(int id) {
+        Optional<Address> address = Optional.empty();
         try (Connection connection = MysqlConnection.getConnection()){
             String sql = "SELECT * FROM users_db.addresses WHERE id_address = ? ";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             while(resultSet.next()){
-                address = new Address(
+                address = Optional.of(new Address(
                         resultSet.getInt("id_address"),
                         resultSet.getString("street"),
                         resultSet.getInt("home")
-                );
+                ));
             }
             return address;
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return new Address();
+        return address;
     }
 
     @Override
-    public Address findAddress(String street, int home) {
-        Address address = new Address();
+    public Optional<Address> findAddress(String street, int home) {
+        Optional<Address> address = Optional.empty();
         try (Connection connection = MysqlConnection.getConnection()){
             String sql = "SELECT * FROM users_db.addresses WHERE street = ? AND home = ? ";
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -86,19 +85,19 @@ public class AddressMysqlDAO implements AddressDAO{
             statement.setInt(2, home);
             ResultSet resultSet = statement.executeQuery();
             while(resultSet.next()){
-                address = new Address(
+                address = Optional.of(new Address(
                         resultSet.getInt("id_address"),
                         resultSet.getString("street"),
                         resultSet.getInt("home")
-                );
+                ));
             }
             return address;
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return new Address();
+        return address;
     }
+
 
     @Override
     public List<Address> findAllAddresses() {
@@ -121,6 +120,5 @@ public class AddressMysqlDAO implements AddressDAO{
         }
         return new ArrayList<>();
     }
-
 
 }
